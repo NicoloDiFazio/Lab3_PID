@@ -213,7 +213,7 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
     double[] rotazionali = new double[3];
     double[] potenze_rototraslazionali = new double[3];
     traslazionali = traslazione(x, y);
-    rotazionali = rotazione(PID_w(alpha, beta));
+    rotazionali = normalizzazione(rotazione(PID_w(alpha, beta)));
     for (int i = 0; i < 3; i++) {potenze_rototraslazionali[i] = traslazionali[i] + rotazionali[i];}
     return potenze_rototraslazionali;
   }
