@@ -1,0 +1,62 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from iminuit import Minuit
+
+def f(x, p):
+    return p[0]*x+p[1]
+
+def fcn(par):
+    residui_pesati = (l - f(t, par)) / e_l
+    return np.sum(residui_pesati**2)
+
+print("\n--- SCELTA DEI PARAMETRI PID ---")
+Kp  = 0 #0.5318442383620181 #float(input("Inserisci il valore di Kp: "))
+Ki  = 0 #2.253450776719937 #float(input("Inserisci il valore di Ki: "))
+Kd  = 0 #0.022039030844941594 #float(input("Inserisci il valore di Kd: "))
+timer = 20 #float(input("Inserisci il valore di phi: "))
+
+#nome_file = "%.1f_%.1f_%.1f_PID.txt" % (Kp, Ki, Kd)
+nome_file = "%.1f_%.1f_%.1f_%.1f_PID.txt" % (Kp, Ki, Kd, timer)
+print(f"\nSto cercando di aprire il file: {nome_file}...")
+
+try:
+    print(f"--- APERTO IL FILE {nome_file} ---")
+    t, r, l, e, o = np.loadtxt(nome_file, unpack=True)
+    #tempo, riferimento, lettura, errore, output
+
+    #derivata = np.gradient(l, t)
+    
+    tempo_0 = t[:np.where(o != 0)[0][0]]
+    t0 = tempo_0[0]
+    lettura_0 = l[:np.where(o != 0)[0][0]]
+    #x_0 =  np.zeros_like(tempo_0)
+    
+    tempo_1 = t[np.where(o != 0)[0][0]:np.where(o != 0)[0][-1]]
+    t1 = tempo_1[0]
+    lettura_1 = l[np.where(o != 0)[0][0]:np.where(o != 0)[0][-1]]
+    #derivata_centrale = derivata[len(tempo_0):len(tempo_0) + len(tempo_1)]
+    #x_1 =  np.ones_like(tempo_1)
+    
+    tempo_2 = t[np.where(o != 0)[0][-1]:]
+    t2 = tempo_2[0]
+    lettura_2 = l[np.where(o != 0)[0][-1]:]
+    #x_2 =  np.zeros_like(tempo_2)
+    
+    plt.figure(figsize=(8, 5))
+    #plt.plot(tempo_0, lettura_0, label="prima parte", color='blue', linestyle='', marker='.') 
+    #plt.plot(tempo_1, lettura_1, label="seconda parte", color='blue', linestyle='', marker='.')
+    #plt.plot(tempo_2, lettura_2, label="terza parte", color='blue', linestyle='', marker='.')
+    plt.plot(t, l, label="lettura", color='blue', linestyle='', marker='.')
+    plt.plot(t, r, label="potenza", color='magenta', linestyle='-', marker=',')
+    
+    #plt.plot(t, derivata, label="derivata", color='green', linestyle='', marker='.')
+    #plt.plot(tempo_1, derivata_centrale, label="derivata_centrale", color='red', linestyle='', marker='.')
+    
+    plt.title("IMPULSO")
+    plt.xlabel("Tempo (s)")
+    plt.ylabel("Angolo (radianti)")
+    plt.legend()
+    plt.show()
+        
+except FileNotFoundError:
+    print(f"\n[ERRORE] Il file '{nome_file}' non esiste.")
