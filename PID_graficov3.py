@@ -12,7 +12,7 @@ In generale cambiera' Kp e p
 print("\n--- CERCO IL FILE fermo.txt ---")
 try:
     print("--- CALCOLO L'ERRORE DEL GIROSCOPIO ---")
-    t, r, l, e, o = np.loadtxt("fermo.txt", unpack=True)
+    t, r, l, e, o = np.loadtxt("datipkp/fermo.txt", unpack=True)
 
     errl = np.std(l)
     print("Errore sulla lettura errl = ", errl)
@@ -27,8 +27,8 @@ Ki = 0.0
 Kd = 0.0
 
 pattern_ricerca = f"*_*_{Ki}_{Kd}_PID.txt"
-
-lista_file = [file.name for file in Path('.').glob(pattern_ricerca)]
+cartella = Path('datipkp')
+lista_file = [file.name for file in cartella.glob(pattern_ricerca)]
 
 #print(lista_file)
 
@@ -44,7 +44,7 @@ for nome_file in lista_file:
         p = float(nome_file.split('_')[0])
         Kp = float(nome_file.split('_')[1])
         
-        t, r, l, e, o = np.loadtxt(nome_file, unpack=True)
+        t, r, l, e, o = np.loadtxt(cartella/nome_file, unpack=True)
         #tempo, riferimento, lettura, errore, output
 
         dati_grafici[(Kp, p)] = (t, r, l, e, o)
@@ -82,8 +82,8 @@ for r_i, p in enumerate(ps):
             # Plot dei dati sul singolo sotto-grafico (ax)
             ax.plot(t, r, label="riferimento", color='blue', linestyle='', marker='.')
             ax.errorbar(t, l, yerr=errl, label="lettura", color='green', linestyle='', marker='.')
-            ax.plot(t, e, label="errore", color='cyan', linestyle='', marker='.')
-            ax.plot(t, o, label="output", color='magenta', linestyle='', marker='.')
+            #ax.plot(t, e, label="errore", color='cyan', linestyle='', marker='.')
+            #ax.plot(t, o, label="output", color='magenta', linestyle='', marker='.')
                 
             ax.grid(True, linestyle=':', alpha=0.6)
         else:
@@ -94,7 +94,7 @@ for r_i, p in enumerate(ps):
         if r_i == 0:
             ax.set_title(f"Kp = {Kp}", fontsize=12, fontweight='bold')
         if c_i == 0:
-            ax.set_ylabel(f"p = {p}", fontsize=12, fontweight='bold')
+            ax.set_ylabel(f"p = {p}", fontsize=12, fontweight='bold', rotation=0, ha='right', va='center')
             
         # Etichette degli assi solo sull'ultima riga e prima colonna (grazie a sharex/sharey)
         if r_i == rig - 1:
@@ -107,4 +107,19 @@ if handles:
     
 plt.suptitle("Matrice risposte allo stimolo", fontsize=16, y=0.98)
 #plt.tight_layout(rect=[0, 0.5, 1, 0.5]) # Ottimizza gli spazi tra i grafici evitando sovrapposizioni
+plt.show()
+
+Kp_vis = float(input("Inserisci il valore di Kp da visualizzare: "))
+p_vis = float(input("Inserisci il valore di p da visualizzare: "))
+
+t, r, l, e, o = dati_grafici[(Kp_vis, p_vis)]
+
+plt.figure(figsize=(8, 5))
+plt.plot(t, r, label="riferimento", color='blue', linestyle='', marker='.')
+plt.errorbar(t, l, yerr=errl, label="lettura", color='green', linestyle='', marker='.')
+
+plt.title("Stimolo con Kp = %.2f e p = %.2f " % (Kp_vis, p_vis))
+plt.xlabel("Tempo (s)")
+plt.ylabel("Angolo (radianti)")
+plt.legend()
 plt.show()
