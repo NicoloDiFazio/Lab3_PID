@@ -111,14 +111,19 @@ try:
     print("\n--- CALCOLO COEFFICIENTI DEL PID ---")
     M_0 = r[len(tempo_0)]
     R, N = t0/T, (C0-y0)/T
-    Kp_new = (9/10 + R/12)*M_0/(N*t0)
     
-    Ti = t0*(30 + 3*R)/(9 + 20*R)
+    Kp_new = (4/3 + R/4)*M_0/(N*t0)
+    
+    Ti = t0*(32 + 6*R)/(13 + 8*R)
     Ki_new = Kp_new/Ti
+
+    Td = t0*4/(11+2*R)
+    Kd_new = Kp_new*Td
     
 #    print(" Kp = %.2f \n Ki = %.2f \n Kd = %.2f" % (Kp_new, Ki_new, Kd_new))
     print(" Kp = ", Kp_new)
     print(" Ki = ", Ki_new)
+    print(" Kd = ", Kd_new)
 #    """
     
     plt.title("IMPULSO")

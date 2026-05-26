@@ -121,15 +121,27 @@ public class AutoRotoTraslazionev8 extends LinearOpMode {
       
       //void moto_temporale(int moto, double tempo, double x, double y, double alpha)
       
+      //test impulso di rotazione
+      p = 1;
+      Kp = 1.5;
+      Ki = 0;
+      Kd = 0;
+      moto_temporale(-1, 5, 0, 0, phi);
+      moto_temporale(0, 0.1, 0, 0, phi+d_ar);
+      moto_temporale(0, 20, 0, 0, phi);
+      
+      //test parametri PID
       //moto_temporale(-1, 5, 0, 0, phi);
-      //moto_temporale(0, 0.1, 0, 0, phi+d_ar);
-      //moto_temporale(0, 20, 0, 0, phi);
+      //moto_temporale(2, 4, 0, 0.5, phi);
+      //moto_temporale(-1, 5, 0, 0, phi);
       
-      moto_temporale(-1, 2, 0, 0.5, phi);
-      moto_temporale(2, 3, 0, 0.5, phi);
-      moto_temporale(-1, 2, 0, 0.5, phi);
+      nomefile = String.valueOf(p) + "_" + String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_PID.txt";
       
-      nomefile = String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_" + String.valueOf(phi) + "_PID.txt";
+      //test per l'errore di lettura del giroscopio
+      //while(timer.seconds() <= 60) {
+      //  raccolta_dati(0, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+      //}
+      //nomefile = "fermo.txt";
     }
     moto_temporale(-1, 0.1, 0, 0, phi);
     if (!logBuffer.isEmpty()) {
@@ -225,7 +237,7 @@ public class AutoRotoTraslazionev8 extends LinearOpMode {
       double beta = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);   //angolo di inclinazione del robot rispetto all'asse z (giroscopio)
       switch (moto){
         case -1: P = azzera(P); output = 0; errore = alpha - beta; break; //"stop";
-        case 0:  P = rotazione(alpha); output = alpha; break; //"Rotazione";
+        case 0:  P = rotazione(PID(alpha, beta)); break; //"Rotazione";
         case 1:  P = traslazione(x, y); output = 0; errore = alpha - beta; break; //"Traslazione";
         case 2:  P = rototraslazione(x, y, alpha, beta); break; //"Rototralsazione";
       }

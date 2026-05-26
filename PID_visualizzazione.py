@@ -13,7 +13,7 @@ try:
     t, r, l, e, o = np.loadtxt(nome_file, unpack=True)
     #tempo, riferimento, lettura, errore, output
 
-    e_l = np.ones_like(l) * 0.01
+    e_l = np.ones_like(l) * 0.001
         
     plt.figure(figsize=(8, 5))
     plt.plot(t, r, label="riferimento", color='blue', linestyle='-', marker=',')
