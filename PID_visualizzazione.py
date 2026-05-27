@@ -18,8 +18,8 @@ try:
     plt.figure(figsize=(8, 5))
     plt.plot(t, r, label="riferimento", color='blue', linestyle='-', marker=',')
     plt.errorbar(t, l, e_l, label="lettura", color='green', linestyle='', marker='.')
-    plt.plot(t, e, label="errore", color='cyan', linestyle='-', marker=',')
-    plt.plot(t, o, label="output", color='magenta', linestyle='-', marker=',')
+    #plt.plot(t, e, label="errore", color='cyan', linestyle='-', marker=',')
+    #plt.plot(t, o, label="output", color='magenta', linestyle='-', marker=',')
     
     plt.title(nome_file)
     plt.xlabel("Tempo (s)")

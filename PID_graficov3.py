@@ -22,12 +22,16 @@ except FileNotFoundError:
     errl = float(input("Inserisci un valore di default per errl: "))
 
 print("\n--- SCELTA DEI PARAMETRI ---")
-#Kp = float(input("Inserisci il valore di Kp: "))
+#p = 0.5
+#Kp = 2.5 #float(input("Inserisci il valore di Kp: "))
 Ki = 0.0
 Kd = 0.0
 
 pattern_ricerca = f"*_*_{Ki}_{Kd}_PID.txt"
-cartella = Path('datipkp')
+#pattern_ricerca = f"{p}_*_{Ki}_{Kd}_PID.txt"
+#pattern_ricerca = f"*_{Kp}_{Ki}_{Kd}_PID.txt"
+#cartella = Path('datipkp')
+cartella = Path('.')
 lista_file = [file.name for file in cartella.glob(pattern_ricerca)]
 
 #print(lista_file)
@@ -61,7 +65,7 @@ col = len(Kps)
 rig = len(ps)
 
 print(f"\n--- CREAZIONE MATRICE DI GRAFICI ({rig} righe x {col} colonne) ---")
-fig, axes = plt.subplots(rig, col, figsize=(5 * col, 9), sharex=True, sharey=True)
+fig, axes = plt.subplots(rig, col, figsize=(5 * col, 9)) #, sharex=True, sharey=True)
 
 if rig == 1 and col == 1:
     axes = np.array([[axes]])
@@ -80,7 +84,7 @@ for r_i, p in enumerate(ps):
             t, r, l, e, o = dati_grafici[(Kp, p)]
             
             # Plot dei dati sul singolo sotto-grafico (ax)
-            ax.plot(t, r, label="riferimento", color='blue', linestyle='', marker='.')
+            #ax.plot(t, r, label="riferimento", color='blue', linestyle='', marker='.')
             ax.errorbar(t, l, yerr=errl, label="lettura", color='green', linestyle='', marker='.')
             #ax.plot(t, e, label="errore", color='cyan', linestyle='', marker='.')
             #ax.plot(t, o, label="output", color='magenta', linestyle='', marker='.')
