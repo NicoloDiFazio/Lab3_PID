@@ -2,6 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from iminuit import Minuit
 
+print("\n--- CERCO IL FILE fermo.txt ---")
+try:
+    print("--- CALCOLO L'ERRORE DEL GIROSCOPIO ---")
+    t, r, l, e, o = np.loadtxt("datinuovabatteria/fermo.txt", unpack=True)
+
+    errl = np.std(l)
+    errt = np.std(np.diff(t))
+    print("Errore sulla lettura errl = ", errl)
+    print("Errore sulla lettura errt = ", errt)
+    
+except FileNotFoundError:
+    print("\n!!! [ERRORE] non hai messo il file fermo.txt !!!")
+    errl = float(input("Inserisci un valore di default per errl: "))
+    errt = float(input("Inserisci un valore di default per errt: "))
+
 print("\n--- SCELTA DEL FILE DA VISUALIZZARE ---")
 
 nome_file = input("Inserisci il nome del file .txt: ")

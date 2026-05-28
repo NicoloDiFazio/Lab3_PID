@@ -9,6 +9,25 @@ Ogni file cambia p ma tiene uguali i valori di Kp, Ki e Kd
 In generale cambiera' Kp e p
 """
 
+def f(x, pa):
+    # p[0] = y0    Offset iniziale
+    # p[1] = A     Ampiezza
+    # p[2] = w     Pulsazione
+    # p[3] = t0    Offset temporale
+    #regime = y0 + A*cos(w*(x-t0) + fase)
+    regime = pa[0] + pa[1] * np.cos(pa[2] * (x - pa[3]))
+    return np.where(x < pa[3], pa[0], regime)
+
+def dfdx(x, pa):
+    #regime = -A*sin(w*(x-t0) + fase)*w
+    regime = -pa[1] * np.sin(pa[2] * (x - pa[3])) * pa[2]
+    return np.where(x < pa[3], 0, regime)
+    
+def fcn(par):
+    errore = errl**2 + (dfdx(t, par)*errt)**2
+    residui_pesati = (l - f(t, par))**2 / errore
+    return np.sum(residui_pesati)
+
 print("\n--- CERCO IL FILE fermo.txt ---")
 try:
     print("--- CALCOLO L'ERRORE DEL GIROSCOPIO ---")
@@ -30,7 +49,7 @@ print("\n--- SCELTA DEI PARAMETRI ---")
 Ki = 0.0
 Kd = 0.0
 
-pattern_ricerca = f"*_*_{Ki}_{Kd}_*.txt"
+pattern_ricerca = f"*_*_{Ki}_{Kd}_PID.txt"
 #pattern_ricerca = f"{p}_*_{Ki}_{Kd}_PID.txt"
 #pattern_ricerca = f"*_{Kp}_{Ki}_{Kd}_PID.txt"
 #cartella = Path('datipkp')
@@ -101,19 +120,83 @@ for r_i, p in enumerate(ps):
             
         # Titoli di riga e colonna solo sui bordi esterni per pulizia visiva
         if r_i == 0:
-            ax.set_title(f"{Kp}", fontsize=12, fontweight='bold')
+            ax.set_title(f"Kp = {Kp}", fontsize=12, fontweight='bold')
         if c_i == 0:
-            ax.set_ylabel(f"{p}", fontsize=12, fontweight='bold', rotation=0, ha='right', va='center')
+            ax.set_ylabel(f"p = {p}", fontsize=12, fontweight='bold', rotation=0, ha='right', va='center')
             
         # Etichette degli assi solo sull'ultima riga e prima colonna (grazie a sharex/sharey)
         if r_i == rig - 1:
             ax.set_xlabel("Tempo (s)")
 
 # Aggiungo una legenda unica globale per non ripeterla in ogni grafico
-handles, labels = axes[0, 0].get_legend_handles_labels()
+handles, labels = [], []
+for row in axes:
+    for ax in row:
+        h, l = ax.get_legend_handles_labels()
+        if h:  # Se abbiamo trovato delle etichette, salviamo ed usciamo dal ciclo
+            handles, labels = h, l
+            break
+    if handles:
+        break
 if handles:
     fig.legend(handles, labels, loc='upper right', bbox_to_anchor=(0.99, 0.95))
     
-plt.suptitle("Matrice risposte allo stimolo con potenza (righe) e Ku (colonne)", fontsize=16, y=0.98)
+plt.suptitle("Matrice risposte allo stimolo", fontsize=16, y=0.98)
 #plt.tight_layout(rect=[0, 0.5, 1, 0.5]) # Ottimizza gli spazi tra i grafici evitando sovrapposizioni
+plt.show()
+
+p_vis = 0.4 #float(input("Inserisci il valore di p da visualizzare: "))
+Kp_vis = 2.25 #float(input("Inserisci il valore di Kp da visualizzare: "))
+#w = float(input("Inserisci il valore di w da visualizzare: "))
+
+#[8.3775804095727819692337156887453(0.6, 1.4727), 7.9587013890941428707720299043081(0.5,2.25), 8.7964594300514210676954014731826(0.4,2.25), 19.268434942017398529237546084114(0.3, 3.0)]
+
+t, r, l, e, o = dati_grafici[(Kp_vis, p_vis)]
+            
+par_iniziali = np.array([0, 0.42, 8.57, 9.9])
+# p[0] = y0    Offset iniziale
+# p[1] = A     Ampiezza
+# p[2] = w     Pulsazione
+# p[3] = t0    Offset temporale
+
+m = Minuit(fcn, par_iniziali)
+m.migrad()
+
+y0, A, w, t0 = m.values
+curva_fit = f(t, m.values)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t, r, label="riferimento", color='blue', linestyle='', marker='.')
+plt.errorbar(t, l, yerr=errl, label="lettura", color='green', linestyle='', marker='.')
+
+plt.plot(t, curva_fit, label="Fit Minuit", color='red', linestyle='-', linewidth=1)
+                
+print("\n--- PARAMETRI DEL FIT OTTENUTI ---")
+print("Offset iniziale   = %f +- %f " % (y0, m.errors[0]))
+print("Ampiezza          = %f +- %f " % (A, m.errors[1]))
+print("Pulsazione        = %f +- %f " % (w, m.errors[2]))
+print("Offset temporale  = %f +- %f " % (t0, m.errors[3]))
+
+# --- BONTA' DEL FIT ---
+print("\n--- BONTA DEL FIT ---")
+chi2 = m.fval  # Il valore minimo della FCN (somma dei residui quadratici)
+ndf = len(t) - len(m.values)  # N_dati - N_parametri
+chi2_ridotto = chi2 / ndf if ndf > 0 else float('nan')
+            
+print("Chi-quadro (chi2)       = %f" % chi2)
+print("Gradi di liberta' (NDF) = %d" % ndf)
+print("Chi-quadro ridotto      = %f" % chi2_ridotto)
+
+# Una piccola nota interpretativa rapida (opzionale ma utile)
+if 0.5 <= chi2_ridotto <= 1.5:
+    print("Ottimo fit (vicino a 1).")
+elif chi2_ridotto > 1.5:
+    print("sottostima degli errori o modello incompleto.")
+else:
+    print("probabile sovrastima degli errori sperimentali.")
+
+plt.title("Stimolo con Kp = %.2f e p = %.2f " % (Kp_vis, p_vis))
+plt.xlabel("Tempo (s)")
+plt.ylabel("Angolo (radianti)")
+plt.legend()
 plt.show()
