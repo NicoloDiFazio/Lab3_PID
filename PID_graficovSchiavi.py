@@ -37,7 +37,7 @@ print(f"\nSto cercando di aprire il file: {nome_file}...")
 
 try:
     print(f"--- APERTO IL FILE {nome_file} ---")
-    t, r_w, l_w, e_w, r_t, l_t, e_t, o = np.loadtxt(nome_file, unpack=True)
+    t, r_w, l_w, e_w, r_a, l_a, e_a, o = np.loadtxt(nome_file, unpack=True)
     #tempo, riferimento, lettura, errore, output
 
     #derivata = np.gradient(l, t)
@@ -62,7 +62,7 @@ try:
     #x_2 =  np.zeros_like(tempo_2)
     
     plt.figure(figsize=(8, 5))
-    plt.errorbar(t, l_w, errl, label="lettura", color='blue', linestyle='', marker='.')
+    plt.errorbar(t, l_a, errl, label="lettura", color='blue', linestyle='-', marker=',')
     plt.plot(t, o, label="potenza", color='magenta', linestyle='-', marker=',')
 
     """    

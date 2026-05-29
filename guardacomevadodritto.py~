@@ -1,0 +1,26 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from iminuit import Minuit
+
+cartella = "davedere/"
+nomifiles = ["0.3_4.0_noPID.txt", "0.4_4.0_noPID.txt", "0.5_4.0_noPID.txt", "0.6_4.0_noPID.txt", "0.3_1.68_5.95936795516598_0.11840181799620855_PIDfittato.txt", "0.4_1.3499999999999999_3.7105538480072124_0.12279164207378301_PIDfittato.txt", "0.5_1.3499999999999999_3.2730709864795053_0.1392041302746285_PIDfittato.txt", "0.6_0.88362_2.2505991596539565_0.08673071580192564_PIDfittato.txt"]
+p = [0.3, 0.4, 0.5, 0.6]
+
+ultimo_file = "0.4_0.3733021196832707_1.6004655198721427_0.013102590620354728_PIDfittato(w).txt"
+
+fig, axs = plt.subplots(2, 4, sharex=True, sharey=True)
+
+for k, nome_file in enumerate(nomifiles):
+    if(k < 4):
+        i = k
+        j = 0
+    else:
+        i = k - 4
+        j = 1
+    print(k, i, j)
+    print(nome_file)
+    
+    t, r, l, e, o = np.loadtxt(cartella + nome_file, unpack=True)
+    axs[j, i].plot(t, l)
+
+plt.show()
