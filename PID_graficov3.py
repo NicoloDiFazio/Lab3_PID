@@ -33,9 +33,9 @@ Kd = 0.0
 pattern_ricerca = f"*_*_{Ki}_{Kd}_*.txt"
 #pattern_ricerca = f"{p}_*_{Ki}_{Kd}_PID.txt"
 #pattern_ricerca = f"*_{Kp}_{Ki}_{Kd}_PID.txt"
-#cartella = Path('datipkp')
+cartella = Path('valoriKubuoni')
 #cartella = Path('.')
-cartella = Path('datinuovabatteria')
+#cartella = Path('datinuovabatteria')
 lista_file = [file.name for file in cartella.glob(pattern_ricerca)]
 
 #print(lista_file)
@@ -89,7 +89,7 @@ for r_i, p in enumerate(ps):
             
             # Plot dei dati sul singolo sotto-grafico (ax)
             #ax.plot(t, r, label="riferimento", color='blue', linestyle='', marker='.')
-            ax.errorbar(t, l, xerr=errt, yerr=errl, label="lettura", color='green', linestyle='', marker=',')
+            ax.errorbar(t, l, xerr=errt, yerr=errl, label="lettura", color='green', linestyle='-', marker=',')
             #ax.plot(t, e, label="errore", color='cyan', linestyle='', marker='.')
             #ax.plot(t, o, label="output", color='magenta', linestyle='', marker='.')
                 
