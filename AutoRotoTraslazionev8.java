@@ -61,9 +61,9 @@ public class AutoRotoTraslazionev8 extends LinearOpMode {
   
   double phi = 0;
   
-  double Kp = 1.2; //0.5318442383620181;;
-  double Ki = 2.7013519386719413; //2; //2.253450776719937;
-  double Kd = 0.13326660434218943; //0.1; //0.022039030844941594;
+  double Kp = 0; //1.2; //0.5318442383620181;;
+  double Ki = 0; //2.7013519386719413; //2; //2.253450776719937;
+  double Kd = 0; //0.13326660434218943; //0.1; //0.022039030844941594;
   
   private ArrayList<String> logBuffer = new ArrayList<>();
   String nomefile;
@@ -122,20 +122,29 @@ public class AutoRotoTraslazionev8 extends LinearOpMode {
       //void moto_temporale(int moto, double tempo, double x, double y, double alpha)
       
       //test impulso di rotazione
-      p = 1;
-      Kp = 1.5;
-      Ki = 0;
-      Kd = 0;
-      moto_temporale(-1, 5, 0, 0, phi);
-      moto_temporale(0, 0.1, 0, 0, phi+d_ar);
-      moto_temporale(0, 20, 0, 0, phi);
+      //p = 0.3;
+      //Kp = 2.8;
+      //Ki = 0;
+      //Kd = 0;
+      //moto_temporale(-1, 5, 0, 0, phi);
+      //moto_temporale(0, 0.1, 0, 0, phi+d_ar);
+      //moto_temporale(0, 20, 0, 0, phi);
+      
+      //nomefile = String.valueOf(p) + "_" + String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_PID.txt";
       
       //test parametri PID
+      p = 0.4;
+      PID_fit(p);
+      double t = 4;
+      moto_temporale(-1, 5, 0, 0, phi);
+      moto_temporale(2, t, 0, 0.5, phi);
+      moto_temporale(-1, 5, 0, 0, phi);
+      //nomefile = String.valueOf(p) + "_" + String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_PIDfittato.txt";
+      nomefile = "test.txt";
       //moto_temporale(-1, 5, 0, 0, phi);
-      //moto_temporale(2, 4, 0, 0.5, phi);
+      //moto_temporale(1, t, 0, 0.5, phi);
       //moto_temporale(-1, 5, 0, 0, phi);
-      
-      nomefile = String.valueOf(p) + "_" + String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_PID.txt";
+      //nomefile = String.valueOf(p) + "_" + String.valueOf(t) + "_noPID.txt";
       
       //test per l'errore di lettura del giroscopio
       //while(timer.seconds() <= 60) {
@@ -259,8 +268,8 @@ public class AutoRotoTraslazionev8 extends LinearOpMode {
         telemetry.addData("phi", Math.toDegrees(alpha));
         telemetry.addData("errore", Math.toDegrees(errore));
         telemetry.addData("delta tempo", delta_tempo);
-        telemetry.update();
       }
+      telemetry.update();
       raccolta_dati(alpha, beta);
     }
   }
@@ -278,6 +287,13 @@ public class AutoRotoTraslazionev8 extends LinearOpMode {
     tempo_precedente = tempo;
     output = (errore * Kp) + (integralSum * Ki) + (derivata * Kd);
     return output;
+  }
+  private void PID_fit(double Potenza){
+    if (Potenza == 0.6){Kp = 0.88362; Ki = 2.2505991596539565; Kd = 0.08673071580192564;}
+    else if (Potenza == 0.5){Kp = 1.3499999999999999; Ki = 3.2730709864795053; Kd = 0.1392041302746285;}
+    else if (Potenza == 0.4){Kp = 1.3499999999999999; Ki = 3.7105538480072124; Kd = 0.12279164207378301;}
+    else if (Potenza == 0.3){Kp = 1.68; Ki = 5.95936795516598; Kd = 0.11840181799620855;}
+    else{Kp =  0; Ki =  0; Kd =  0;}
   }
   
   private File fileLog;

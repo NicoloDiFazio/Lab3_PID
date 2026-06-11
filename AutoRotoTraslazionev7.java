@@ -32,7 +32,7 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
   
   double PS, PE, PO;                      //potenza del Motore Sud, East, Ovest
   double[] P = new double[3];             //array potenze
-  double p = 0.5;                           //fattore attenuazine della potenza dei motori
+  double p = 0.4;                           //fattore attenuazine della potenza dei motori
   
   double G = Math.toRadians(0);               //angolo di inclinazione del Motore Sud rispetto all'asse X               (0)
   double cosG = Math.cos(G);                  //coseno dell'angolo di inclinazione del Motore Sud rispetto all'asse X   (1)
@@ -50,8 +50,9 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
   ElapsedTime cronometro = new ElapsedTime(); //cronometro totale, tiene il tempo di tutto il programma
   ElapsedTime timer = new ElapsedTime();      //timer, da usare per tenere il tempo di un periodo preciso
   
-  double errore = 0;
-  double errore_precedente = 0;
+  double errore_w = 0;
+  double errore_t = 0;
+  double errore_precedente_w = 0;
   double tempo = 0;
   double tempo_precedente = 0;
   double delta_tempo = 0;
@@ -61,9 +62,9 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
   
   double phi = 0;
   
-  double Kp = 2.7253345222602285; //0.5318442383620181;;
-  double Ki = 74.74124818676849; //2; //2.253450776719937;
-  double Kd = 0; //0.1; //0.022039030844941594;
+  double Kp = 0; //40.39935188143795; //0.5318442383620181;;
+  double Ki = 0; //148.46002782120138; //2; //2.253450776719937;
+  double Kd = 0; //0.016265511063943205; //0.1; //0.022039030844941594;
   
   private ArrayList<String> logBuffer = new ArrayList<>();
   String nomefile;
@@ -115,24 +116,28 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
       telemetry.addData("Sto", "eseguendo il programma...");
       telemetry.update();
       
-      phi = 0;                         //angolo di inclinazione richiesto
-      double d_a = 45;                         //passo angolo
-      double d_ar = Math.toRadians(d_a);
+      phi = 0;
       
       //void moto_temporale(int moto, double tempo, double x, double y, double alpha)
       
-      //moto_temporale(-1, 5, 0, 0, phi);
-      //moto_temporale(0, 0.1, 0, 0, phi+d_ar);
-      //moto_temporale(0, 20, 0, 0, phi);
+      //test rotazione per "panettone"
+      //double timer = 15;
+      //moto_temporale(-1, 5, 0, 0, 0);
+      //moto_temporale(0, timer, 0, 0, p);
+      //moto_temporale(-1, 5, 0, 0, 0);
+      //nomefile = String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_" + String.valueOf(timer) + "_PID.txt";
+    
       
-      //moto_temporale(2, 3, 0, 0.5, phi);
-      //moto_temporale(-1, 2, 0, 0.5, phi);
+      //test PID calcolati
+      p = 0.4;
+      Kp = 0.3733021196832707;
+      Ki = 1.6004655198721427;
+      Kd = 0.013102590620354728;
       double timer = 4;
-      moto_temporale(-1, 5, 0, 0, 0);
-      moto_temporale(2, timer, 0, 0.5, 0);
-      moto_temporale(-1, 5, 0, 0, 0);
-      
-      nomefile = String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_" + String.valueOf(timer) + "_PID.txt";
+      moto_temporale(-1, 5, 0, 0, phi);
+      moto_temporale(2, timer, 0, 0.5, phi);
+      moto_temporale(-1, 5, 0, 0, phi);
+      nomefile = String.valueOf(p) + "_" + String.valueOf(Kp) + "_" + String.valueOf(Ki) + "_" + String.valueOf(Kd) + "_PIDfittato(w).txt";
     }
     moto_temporale(-1, 0.1, 0, 0, phi);
     if (!logBuffer.isEmpty()) {
@@ -186,34 +191,12 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
     for (int i = 0; i < 3; i++) {potenze_rotazionali[i] = differenza;}
     return potenze_rotazionali;
   }
-  private void rotazione_impulsiva(double alpha) {
-    double beta = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-    while(opModeIsActive() && alpha - beta > 0){
-      errore = alpha - beta;
-      output = p*Math.signum(errore);
-      for (int i = 0; i < 3; i++) {P[i] = output;}
-      PS = P[0];
-      PE = P[1];
-      PO = P[2];
-      sud.setPower(PS);
-      east.setPower(PE);
-      ovest.setPower(PO);
-      raccolta_dati(alpha, beta);
-      beta = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-    }
-    errore = alpha - beta;
-    output = -p;
-    sud.setPower(output);
-    east.setPower(output);
-    ovest.setPower(output);
-    raccolta_dati(alpha, beta);
-  }
-  private double[] rototraslazione(double x, double y, double alpha, double beta) {
+  private double[] rototraslazione(double x, double y, double omega, double alpha, double beta) {
     double[] traslazionali = new double[3];
     double[] rotazionali = new double[3];
     double[] potenze_rototraslazionali = new double[3];
     traslazionali = traslazione(x, y);
-    rotazionali = normalizzazione(rotazione(PID_w(alpha, beta)));
+    rotazionali = rotazione(PID_w(0, omega, alpha, beta));
     for (int i = 0; i < 3; i++) {potenze_rototraslazionali[i] = traslazionali[i] + rotazionali[i];}
     return potenze_rototraslazionali;
   }
@@ -222,16 +205,16 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
     timer.reset();
     tempo_precedente = cronometro.seconds();
     integralSum = 0;
-    errore_precedente = alpha - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+    errore_precedente_w = alpha - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     
     while(opModeIsActive() && timer.seconds() <= t){
       double beta = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);   //angolo di inclinazione del robot rispetto all'asse z (giroscopio)
       double omega = imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
       switch (moto){
-        case -1: P = azzera(P); output = 0; errore = alpha - omega; break; //"stop";
+        case -1: P = azzera(P); output = 0; break; //"stop";
         case 0:  P = rotazione(alpha); output = alpha; break; //"Rotazione";
-        case 1:  P = traslazione(x, y); output = 0; errore = alpha - beta; break; //"Traslazione";
-        case 2:  P = rototraslazione(x, y, alpha, omega); break; //"Rototralsazione";
+        case 1:  P = traslazione(x, y); output = 0; break; //"Traslazione";
+        case 2:  P = rototraslazione(x, y, omega, alpha, beta); break; //"Rototralsazione";
       }
       P = normalizzazione(P);
       PS = P[0];
@@ -241,54 +224,29 @@ public class AutoRotoTraslazionev7 extends LinearOpMode {
       east.setPower(PE);
       ovest.setPower(PO);
       
-      if (verboso) {
-        telemetry.addData("moto", moto);
-        telemetry.addData("PS", PS);
-        telemetry.addData("PE", PE);
-        telemetry.addData("PO", PO);
-        telemetry.addData("tempo", cronometro.seconds());
-        telemetry.addData("gyro", Math.toDegrees(beta));
-        telemetry.addData("phi", Math.toDegrees(alpha));
-        telemetry.addData("errore", Math.toDegrees(errore));
-        telemetry.addData("delta tempo", delta_tempo);
-        telemetry.update();
-      }
-      raccolta_dati(alpha, omega);
+      raccolta_dati(0, omega, alpha, beta);
+      telemetry.update();
     }
   }
   
-  private double PID(double riferimento, double lettura){
-    errore = riferimento - lettura;
-    if (errore > Math.PI) {errore -= 2 * Math.PI;}
-    else if (errore < -Math.PI) {errore += 2 * Math.PI;}
+  private double PID_w(double riferimento_w, double lettura_w, double riferimento_t, double lettura_t){
+    errore_w = riferimento_w - lettura_w;
+    errore_t = riferimento_t - lettura_t;
     tempo = cronometro.seconds();
     delta_tempo = tempo - tempo_precedente;
     if (delta_tempo <= 0) {delta_tempo = 0.001;}
-    integralSum += errore * delta_tempo;
-    derivata = (errore - errore_precedente)/delta_tempo; //approssimazione
-    errore_precedente = errore;
+    derivata = (errore_w - errore_precedente_w)/delta_tempo; //approssimazione
+    errore_precedente_w = errore_w;
     tempo_precedente = tempo;
-    output = (errore * Kp) + (integralSum * Ki) + (derivata * Kd);
-    return output;
-  }
-  private double PID_w(double riferimento, double lettura){
-    errore = riferimento - lettura;
-    tempo = cronometro.seconds();
-    delta_tempo = tempo - tempo_precedente;
-    if (delta_tempo <= 0) {delta_tempo = 0.001;}
-    integralSum += errore * delta_tempo;
-    derivata = (errore - errore_precedente)/delta_tempo; //approssimazione
-    errore_precedente = errore;
-    tempo_precedente = tempo;
-    output = (errore * Kp) + (integralSum * Ki) + (derivata * Kd);
+    output = (errore_w * Kp) + (errore_t * Ki) + (derivata * Kd);
     return output;
   }
   
   private File fileLog;
   private PrintWriter scrittoreFile;
   
-  private void raccolta_dati(double alpha, double beta) {
-    String riga = String.format(java.util.Locale.US, "%.4f  %.4f  %.4f  %.4f  %.4f", cronometro.seconds(), alpha, beta, errore, output);
+  private void raccolta_dati(double w_rif, double w_let, double alpha, double beta) {
+    String riga = String.format(java.util.Locale.US, "%.4f  %.4f  %.4f  %.4f  %.4f  %.4f  %.4f  %.4f", cronometro.seconds(), w_rif, w_let, w_rif - w_let, alpha, beta, alpha - beta, output);
     logBuffer.add(riga);
   }
   private void ScriviBufferSuFile(String nomeFile, ArrayList<String> buffer) {
