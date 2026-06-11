@@ -30,8 +30,8 @@ timer = 15 #float(input("Inserisci il valore di phi: "))
 #nome_file = "%.1f_%.1f_%.1f_PID.txt" % (Kp, Ki, Kd)
 #cartella = "./"
 cartella = "datinuovabatteria/"
-#nome_file = "%.1f_%.1f_%.1f_%.1f_PID.txt" % (Kp, Ki, Kd, timer)
-nome_file = '0.4_0.3733021196832707_1.6004655198721427_0.013102590620354728_PIDfittato(w).txt'
+nome_file = "%.1f_%.1f_%.1f_%.1f_PID.txt" % (Kp, Ki, Kd, timer)
+#nome_file = '0.4_0.3733021196832707_1.6004655198721427_0.013102590620354728_PIDfittato(w).txt'
 nome_file = cartella+nome_file
 print(f"\nSto cercando di aprire il file: {nome_file}...")
 
@@ -61,11 +61,11 @@ try:
     lettura_2 = l_w[np.where(o != 0)[0][-1]:]
     #x_2 =  np.zeros_like(tempo_2)
     
-    plt.figure(figsize=(8, 5))
-    plt.errorbar(t, l_a, errl, label="lettura", color='blue', linestyle='-', marker=',')
+    plt.figure(num="Grafico Velocita angolare", figsize=(8, 5))
+    plt.errorbar(t, l_w, errl, label="lettura", color='blue', linestyle='-', marker=',')
     plt.plot(t, o, label="potenza", color='magenta', linestyle='-', marker=',')
 
-    """    
+    #"""    
     #          PARAMETRI
     par_iniziali = np.array([2.54, 20.9, 1.24, 0.098])
     
