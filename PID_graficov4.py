@@ -118,7 +118,7 @@ m.migrad()
 y0, A, w, t0, t1 = m.values
 curva_fit = f(t, m.values)
 
-plt.figure(figsize=(8, 5))
+plt.figure(num=f"Fit p={p} Ku={Ku}", figsize=(8, 5))
 
 plt.errorbar(t, l, yerr=errl, label="lettura", color='green', linestyle='', marker='.')
 plt.plot(t, curva_fit, label="Fit Minuit", color='red', linestyle='-', linewidth=1)
