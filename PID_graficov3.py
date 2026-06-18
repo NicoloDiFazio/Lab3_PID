@@ -62,7 +62,7 @@ for nome_file in lista_file:
     except FileNotFoundError:
         print(f"\n[ERRORE] Il file '{nome_file}' non esiste.")
 
-ps = sorted(list(ps_disordinati))
+ps = sorted(list(ps_disordinati), reverse=True)
 Kps = sorted(list(Kps_disordinati))
 
 col = len(Kps)
